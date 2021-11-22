@@ -2,6 +2,8 @@ const input = require("./input/2");
 let availableIngredients = require("./models/ingredients");
 let Beverage = require("./models/beverage").Beverage;
 const Bottleneck = require("bottleneck");
+const Mutex = require("async-mutex").Mutex;
+const mutex = new Mutex();
 
 let machineOutlet = input.machine.outlets.count_n;
 availableIngredients = input.machine.total_items_quantity;
@@ -37,37 +39,47 @@ function deductAvaialbleIngredients(ingredient, quantity) {
     availableIngredients[ingredient] -= quantity;
 }
 
-function buildBeverage(requiredIngredients) {
-        
+async function buildBeverage(requiredIngredients) {        
     let ingredients = Object.keys(requiredIngredients);   
-    let canBeServed = false; 
-    checkIfAllIngredientsArePresent(ingredients);
-    ingredients.forEach(ingredient => {
+    let canBeServed = false;  
+    
+    let releaseLock = await mutex.acquire(); 
+    // Critical Section
+    try {
+        checkIfAllIngredientsArePresent(ingredients);
+        ingredients.forEach(ingredient => {
         let quantity = requiredIngredients[ingredient];                
         isIngredientSufficient(ingredient, quantity)
         deductAvaialbleIngredients(ingredient, quantity);
         canBeServed = true;
     });
+    // Critical Section Over
+    releaseLock()
+    } catch (error) {
+        releaseLock();
+        throw error;
+    }
+    
 
     return canBeServed;
 }
 
-function serveBeverage(beverageObject) {
+async function serveBeverage(beverageObject) {
     let name = beverageObject.name;
     let requiredIngredients = beverageObject.ingredients;
-
     try {
-        buildBeverage(requiredIngredients);
+        await buildBeverage(requiredIngredients);
         console.log(`${name} is prepared`);
     } catch (error) {
         console.log(`${name} cannot be prepared  -> ${error.message}`)
     }
+    
 }
-
-
 
 let requriedBeverages = getRequiredBeverage();
 
 const limiter = new Bottleneck({ maxConcurrent: machineOutlet })
-let tasks = requriedBeverages.map((beverage) => limiter.schedule(() => serveBeverage(beverage)));
+let tasks = requriedBeverages.map(async (beverage) => {
+    limiter.schedule(() => serveBeverage(beverage))
+});
 Promise.all(tasks).then(() => console.log("DONE"));
