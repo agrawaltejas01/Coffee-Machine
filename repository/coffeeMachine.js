@@ -1,5 +1,4 @@
-const input = require('../input/1');
-let availableIngredients = require('../models/ingredients');
+const input = require('../input/2');
 let Beverage = require('../models/beverage').Beverage;
 
 exports.getMachineOutlet = function () {
@@ -8,7 +7,8 @@ exports.getMachineOutlet = function () {
 };
 
 exports.getAvailableIngredients = function () {
-  availableIngredients = input.machine.total_items_quantity;
+  let availableIngredients = input.machine.total_items_quantity;
+  return availableIngredients;
 };
 
 exports.getRequiredBeverage = function () {
@@ -23,18 +23,29 @@ exports.getRequiredBeverage = function () {
   return toReturn;
 };
 
-exports.checkIfAllIngredientsArePresent = function (requiredIngredients) {
+exports.checkIfAllIngredientsArePresent = function (
+  availableIngredients,
+  requiredIngredients
+) {
   requiredIngredients.forEach((ingredient) => {
     if (availableIngredients[ingredient] === undefined)
       throw new Error(`${ingredient} is Not Avaialble`);
   });
 };
 
-exports.isIngredientSufficient = function (ingredient, quantity) {
+exports.isIngredientSufficient = function (
+  availableIngredients,
+  ingredient,
+  quantity
+) {
   if (availableIngredients[ingredient] < quantity)
     throw new Error(`${ingredient} is Not Avaialble in sufficient quantity`);
 };
 
-exports.deductAvaialbleIngredients = function (ingredient, quantity) {
+exports.deductAvaialbleIngredients = function (
+  availableIngredients,
+  ingredient,
+  quantity
+) {
   availableIngredients[ingredient] -= quantity;
 };
