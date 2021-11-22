@@ -1,21 +1,20 @@
-const input = require('../input/2');
 let Beverage = require('../models/beverage').Beverage;
 
-exports.getMachineOutlet = function () {
-  let machineOutlet = input.machine.outlets.count_n;
+exports.getMachineOutlet = function (data) {
+  let machineOutlet = data.machine.outlets.count_n;
   return machineOutlet;
 };
 
-exports.getAvailableIngredients = function () {
-  let availableIngredients = input.machine.total_items_quantity;
+exports.getAvailableIngredients = function (data) {
+  let availableIngredients = data.machine.total_items_quantity;
   return availableIngredients;
 };
 
-exports.getRequiredBeverage = function () {
+exports.getRequiredBeverage = function (data) {
   let toReturn = [];
-  let requriedBeverages = Object.keys(input.machine.beverages);
+  let requriedBeverages = Object.keys(data.machine.beverages);
   requriedBeverages.forEach((beverage) => {
-    let ingredients = input.machine.beverages[beverage];
+    let ingredients = data.machine.beverages[beverage];
     let beverageObject = new Beverage(beverage, ingredients);
     toReturn.push(beverageObject);
   });
