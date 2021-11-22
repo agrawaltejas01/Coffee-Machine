@@ -9,6 +9,7 @@
   "author": "Tejas Agrawal",
   "license": "ISC",
   "dependencies": {
-    "async": "^3.2.2"
+    "async-mutex": "^0.3.2",
+    "bottleneck": "^2.19.5"
   }
 }

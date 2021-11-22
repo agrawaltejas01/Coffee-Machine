@@ -1,25 +1,24 @@
 const input = require("./input/2");
 let availableIngredients = require("./models/ingredients");
 let Beverage = require("./models/beverage").Beverage;
-const async = require("async");
+const Bottleneck = require("bottleneck");
 
 let machineOutlet = input.machine.outlets.count_n;
 availableIngredients = input.machine.total_items_quantity;
 console.log(availableIngredients);
 
-let tasks = [];
 
-// function getAvailableIngredients() {
-//     let availableRightNow = [];
-//     let ingredients = Object.keys(availableIngredients);
-//     ingredients.forEach(ingredient => {
-//         if(availableIngredients[ingredient])
-//         availableRightNow.push(ingredient);        
-//     });
+function getRequiredBeverage() {
+    let toReturn = [];
+    let requriedBeverages = Object.keys(input.machine.beverages);
+    requriedBeverages.forEach(beverage => {
+        let ingredients = input.machine.beverages[beverage];
+        let beverageObject = new Beverage(beverage, ingredients);
+        toReturn.push(beverageObject);
+    });
 
-//     return availableRightNow;
-
-// }
+    return toReturn;
+}
 
 function checkIfAllIngredientsArePresent(requiredIngredients) {
     requiredIngredients.forEach(ingredient => {
@@ -30,10 +29,8 @@ function checkIfAllIngredientsArePresent(requiredIngredients) {
 }
 
 function isIngredientSufficient(ingredient, quantity) {
-
     if(availableIngredients[ingredient] < quantity)
-        throw new Error(`${ingredient} is Not Avaialble in sufficient quantity`);
-    
+        throw new Error(`${ingredient} is Not Avaialble in sufficient quantity`);    
 }
 
 function deductAvaialbleIngredients(ingredient, quantity) {
@@ -67,28 +64,10 @@ function serveBeverage(beverageObject) {
     }
 }
 
-function getRequiredBeverage() {
-    let toReturn = [];
-    let requriedBeverages = Object.keys(input.machine.beverages);
-    requriedBeverages.forEach(beverage => {
-        let ingredients = input.machine.beverages[beverage];
-        let beverageObject = new Beverage(beverage, ingredients);
-        toReturn.push(beverageObject);
-    });
 
-    return toReturn;
-}
 
 let requriedBeverages = getRequiredBeverage();
 
-// requriedBeverages.forEach(beverage => {
-//     serveBeverage(beverage)
-// })
-
-// async.eachLimit(requriedBeverages, machineOutlet, serveBeverage)
-// .then(() => console.log(done))
-// .catch((err) => console.log(err.message));
-
-async.each(requriedBeverages, serveBeverage)
-.then(() => console.log(done))
-.catch((err) => console.log(err.message));
+const limiter = new Bottleneck({ maxConcurrent: machineOutlet })
+let tasks = requriedBeverages.map((beverage) => limiter.schedule(() => serveBeverage(beverage)));
+Promise.all(tasks).then(() => console.log("DONE"));
