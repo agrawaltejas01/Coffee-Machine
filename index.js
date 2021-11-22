@@ -1,10 +1,10 @@
-const input = require("./input/1");
+const input = require("./input/2");
 let availableIngredients = require("./models/ingredients");
 let Beverage = require("./models/beverage").Beverage;
+const async = require("async");
 
 let machineOutlet = input.machine.outlets.count_n;
 availableIngredients = input.machine.total_items_quantity;
-let beverages = [];
 console.log(availableIngredients);
 
 let tasks = [];
@@ -21,16 +21,19 @@ let tasks = [];
 
 // }
 
-function isIngredientAvailable(ingredient, quantity) {
-    if(availableIngredients[ingredient] === undefined)
-        throw new Error(`${ingredient} is Not Avaialble`);
-        // throw some error
-        // return false;
+function checkIfAllIngredientsArePresent(requiredIngredients) {
+    requiredIngredients.forEach(ingredient => {
+        if(availableIngredients[ingredient] === undefined)
+            throw new Error(`${ingredient} is Not Avaialble`);
+    })
+    
+}
+
+function isIngredientSufficient(ingredient, quantity) {
+
     if(availableIngredients[ingredient] < quantity)
         throw new Error(`${ingredient} is Not Avaialble in sufficient quantity`);
-        // throw some error
-        // return false;
-    return true;
+    
 }
 
 function deductAvaialbleIngredients(ingredient, quantity) {
@@ -41,13 +44,10 @@ function buildBeverage(requiredIngredients) {
         
     let ingredients = Object.keys(requiredIngredients);   
     let canBeServed = false; 
+    checkIfAllIngredientsArePresent(ingredients);
     ingredients.forEach(ingredient => {
-        let quantity = requiredIngredients[ingredient];        
-        if(! isIngredientAvailable(ingredient, quantity)){
-            console.log(`${ingredient} Not Available`);
-            return;
-        }
-        // console.log(`${ingredient} -> ${quantity} Available`);
+        let quantity = requiredIngredients[ingredient];                
+        isIngredientSufficient(ingredient, quantity)
         deductAvaialbleIngredients(ingredient, quantity);
         canBeServed = true;
     });
@@ -65,7 +65,6 @@ function serveBeverage(beverageObject) {
     } catch (error) {
         console.log(`${name} cannot be prepared  -> ${error.message}`)
     }
-
 }
 
 function getRequiredBeverage() {
@@ -82,8 +81,14 @@ function getRequiredBeverage() {
 
 let requriedBeverages = getRequiredBeverage();
 
-requriedBeverages.forEach(beverage => {
-    serveBeverage(beverage)
-})
+// requriedBeverages.forEach(beverage => {
+//     serveBeverage(beverage)
+// })
 
+// async.eachLimit(requriedBeverages, machineOutlet, serveBeverage)
+// .then(() => console.log(done))
+// .catch((err) => console.log(err.message));
 
+async.each(requriedBeverages, serveBeverage)
+.then(() => console.log(done))
+.catch((err) => console.log(err.message));
