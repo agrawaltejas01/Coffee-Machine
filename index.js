@@ -1,6 +1,7 @@
 const async = require('async');
 const coffeeMachineService = require('./service/coffeeMachine');
 const coffeeMachineRepo = require('./repository/coffeeMachine');
+const yargs = require('yargs');
 
 function processDrinks(fileName, callback) {
   fileName = fileName || 'sample_input';
@@ -25,8 +26,7 @@ function processDrinks(fileName, callback) {
   );
 }
 
-// Specify the input file here
-let inputFileName = '';
+let inputFileName = yargs.argv.input || '';
 processDrinks(inputFileName, function (err, result) {
   if (err) console.error(err);
   else console.log(result);
@@ -44,3 +44,7 @@ function processDrinksAsync(inputFileName = 'sample_input') {
 module.exports = {
   processDrinksAsync,
 };
+
+process.on('uncaughtException', (err) => {
+  console.error(err);
+});

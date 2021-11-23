@@ -31,13 +31,17 @@ npm i
 ### Execute
 
 - Project by default runs for the sample input
-- If you want to specify a custom input file
-  - Add the json file in <b>input</b> folder
-  - Edit the <b>inputFileName<b> in [index.js](index.js#L29)
-- Run the project by command
 
 ```bash
 node index.js
+```
+
+- If you want to specify a custom input file
+  - Add the json file in <b>input</b> folder
+  - Run the project with a argument as follow
+
+```bash
+node index.js --input=test_sufficient_ingredients.json
 ```
 
 ### Running Tests
