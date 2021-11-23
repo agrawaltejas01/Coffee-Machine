@@ -2,8 +2,9 @@ const async = require('async');
 const coffeeMachineService = require('./service/coffeeMachine');
 const coffeeMachineRepo = require('./repository/coffeeMachine');
 
-function processDrinks(filePath, callback) {
-  filePath = filePath || './input/1.json';
+function processDrinks(fileName, callback) {
+  fileName = fileName || '1.json';
+  let filePath = `./input/${fileName}`;
   const data = require(filePath);
   const resultArray = [];
 
@@ -29,9 +30,9 @@ processDrinks('', function (err, result) {
   else console.log(result);
 });
 
-function processDrinksAsync(filePath = '') {
+function processDrinksAsync(inputFileName = '1.json') {
   return new Promise(function (resolve, reject) {
-    processDrinks(filePath, function (err, result) {
+    processDrinks(inputFileName, function (err, result) {
       if (err) reject(err);
       else resolve(result);
     });
