@@ -3,7 +3,7 @@ const coffeeMachineService = require('./service/coffeeMachine');
 const coffeeMachineRepo = require('./repository/coffeeMachine');
 
 function processDrinks(fileName, callback) {
-  fileName = fileName || '1.json';
+  fileName = fileName || 'sample_input';
   let filePath = `./input/${fileName}`;
   const data = require(filePath);
   const resultArray = [];
