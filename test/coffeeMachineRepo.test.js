@@ -1,6 +1,4 @@
-const { assert } = require('chai');
-const chai = require('chai');
-const expect = chai.expect;
+const { assert, expect } = require('chai');
 const coffeeMachineRepo = require('../repository/coffeeMachine');
 
 describe('Check if All Ingredients are available', () => {

@@ -46,6 +46,10 @@ exports.checkIfAllIngredientsArePresent = function (
   availableIngredients,
   requiredIngredients
 ) {
+  // console.log('------ Inside repo -------');
+  // console.log(availableIngredients);
+  // console.log(requiredIngredients);
+
   requiredIngredients.forEach((ingredient) => {
     if (availableIngredients[ingredient] === undefined)
       throw new Error(`${ingredient} is Not Avaialble`);

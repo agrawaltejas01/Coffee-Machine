@@ -1,16 +1,56 @@
 const Bottleneck = require('bottleneck');
-const data = require('./input/2');
+const async = require('async');
 const coffeeMachineService = require('./service/coffeeMachine');
 const coffeeMachineRepo = require('./repository/coffeeMachine');
 
-let machineOutlet = coffeeMachineRepo.getMachineOutlet(data);
-let requriedBeverages = coffeeMachineRepo.getRequiredBeverage(data);
-let availableIngredients = coffeeMachineRepo.getAvailableIngredients(data);
+async function processDrinks(filePath) {
+  filePath = filePath || './input/1.json';
+  const data = require(filePath);
 
-const limiter = new Bottleneck({ maxConcurrent: machineOutlet });
-let tasks = requriedBeverages.map(async (beverage) => {
-  limiter.schedule(() =>
-    coffeeMachineService.serveBeverage(availableIngredients, beverage)
+  let machineOutlet = coffeeMachineRepo.getMachineOutlet(data);
+  let requriedBeverages = coffeeMachineRepo.getRequiredBeverage(data);
+  let availableIngredients = coffeeMachineRepo.getAvailableIngredients(data);
+
+  const limiter = new Bottleneck({ maxConcurrent: machineOutlet });
+  let tasks = requriedBeverages.map((beverage) => {
+    limiter.schedule(() =>
+      coffeeMachineService.serveBeverage(availableIngredients, beverage)
+    );
+  });
+
+  const result = await Promise.all(tasks);
+  console.log(result);
+}
+
+function processDrinksAsync(filePath) {
+  filePath = filePath || './input/1.json';
+  const data = require(filePath);
+  const resultArray = [];
+
+  let machineOutlet = coffeeMachineRepo.getMachineOutlet(data);
+  let requriedBeverages = coffeeMachineRepo.getRequiredBeverage(data);
+  let availableIngredients = coffeeMachineRepo.getAvailableIngredients(data);
+  async.eachLimit(
+    requriedBeverages,
+    machineOutlet,
+    coffeeMachineService.serveBeverage.bind(null, {
+      availableIngredients,
+      resultArray,
+    }),
+    function (err) {
+      if (err) console.log(err);
+      else console.log(resultArray);
+    }
   );
-});
-Promise.all(tasks).then(() => console.log('DONE'));
+}
+
+processDrinksAsync();
+
+// processDrinks()
+//   //   .then(console.log())
+//   .then(() => console.log('Done'))
+//   .catch((err) => console.log(err));
+
+module.exports = {
+  processDrinks,
+};

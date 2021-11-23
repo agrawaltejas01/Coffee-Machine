@@ -26,8 +26,8 @@ async function buildBeverage(availableIngredients, requiredIngredients) {
         ingredient,
         quantity
       );
-      canBeServed = true;
     });
+    canBeServed = true;
     // Critical Section Over
     releaseLock();
   } catch (error) {
@@ -38,15 +38,28 @@ async function buildBeverage(availableIngredients, requiredIngredients) {
   return canBeServed;
 }
 
-async function serveBeverage(availableIngredients, beverageObject) {
+function serveBeverage(
+  { availableIngredients, resultArray },
+  beverageObject,
+  callback
+) {
   let name = beverageObject.name;
   let requiredIngredients = beverageObject.ingredients;
-  try {
-    await buildBeverage(availableIngredients, requiredIngredients);
-    console.log(`${name} is prepared`);
-  } catch (error) {
-    console.log(`${name} cannot be prepared  -> ${error.message}`);
-  }
+  let result = '';
+
+  buildBeverage(availableIngredients, requiredIngredients)
+    .then((isServable) => {
+      if (isServable) {
+        result = `${name} is prepared`;
+        resultArray.push(result);
+        callback(null);
+      } else callback('Unexpected error in buildBeverage');
+    })
+    .catch((error) => {
+      result = `${name} cannot be prepared  -> ${error.message}`;
+      resultArray.push(result);
+      callback(null);
+    });
 }
 
 module.exports = {
