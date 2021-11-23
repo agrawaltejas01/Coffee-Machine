@@ -25,7 +25,9 @@ function processDrinks(fileName, callback) {
   );
 }
 
-processDrinks('', function (err, result) {
+// Specify the input file here
+let inputFileName = '';
+processDrinks(inputFileName, function (err, result) {
   if (err) console.error(err);
   else console.log(result);
 });
