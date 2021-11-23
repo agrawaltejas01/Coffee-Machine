@@ -1,5 +1,7 @@
 # Coffee Machine
 
+## [Documentation](https://docs.google.com/document/d/11sBE6WRGa_Xk9jifBYNfUt6KlfWyyENogBQbx5lx9gs/edit?usp=sharing)
+
 ## Description
 
 - A sample project to simulate the interface of a coffee machine
