@@ -30,7 +30,7 @@ processDrinks('', function (err, result) {
   else console.log(result);
 });
 
-function processDrinksAsync(inputFileName = '1.json') {
+function processDrinksAsync(inputFileName = 'sample_input') {
   return new Promise(function (resolve, reject) {
     processDrinks(inputFileName, function (err, result) {
       if (err) reject(err);
