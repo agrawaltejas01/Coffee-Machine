@@ -1,7 +1,8 @@
 const async = require('async');
+const yargs = require('yargs');
+
 const coffeeMachineService = require('./service/coffeeMachine');
 const coffeeMachineRepo = require('./repository/coffeeMachine');
-const yargs = require('yargs');
 
 function processDrinks(fileName, callback) {
   fileName = fileName || 'sample_input';
@@ -9,9 +10,12 @@ function processDrinks(fileName, callback) {
   const data = require(filePath);
   const resultArray = [];
 
+  // Init
   let machineOutlet = coffeeMachineRepo.getMachineOutlet(data);
   let requriedBeverages = coffeeMachineRepo.getRequiredBeverage(data);
   let availableIngredients = coffeeMachineRepo.getAvailableIngredients(data);
+
+  // Serve 'N' the beverages parallely
   async.eachLimit(
     requriedBeverages,
     machineOutlet,
@@ -32,6 +36,7 @@ processDrinks(inputFileName, function (err, result) {
   else console.log(result);
 });
 
+// Exported for Tests
 function processDrinksAsync(inputFileName = 'sample_input') {
   return new Promise(function (resolve, reject) {
     processDrinks(inputFileName, function (err, result) {

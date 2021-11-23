@@ -3,30 +3,54 @@ const mutex = new Mutex();
 
 const coffeeMachineRepo = require('../repository/coffeeMachine');
 
-async function buildBeverage(availableIngredients, requiredIngredients) {
+function checkIfAllIngredientsArePresentAndSufficient(
+  availableIngredients,
+  requiredIngredients
+) {
   let ingredients = Object.keys(requiredIngredients);
+  // Check if all ingredients are present
+  coffeeMachineRepo.checkIfAllIngredientsArePresent(
+    availableIngredients,
+    ingredients
+  );
+
+  // Check if each ingredient is sufficient
+  ingredients.forEach((ingredient) => {
+    let quantity = requiredIngredients[ingredient];
+    coffeeMachineRepo.isIngredientSufficient(
+      availableIngredients,
+      ingredient,
+      quantity
+    );
+  });
+}
+
+function deductAvaialbleIngredients(availableIngredients, requiredIngredients) {
+  let ingredients = Object.keys(requiredIngredients);
+
+  // If everything is avaialble, deduct available quantities
+  ingredients.forEach((ingredient) => {
+    let quantity = requiredIngredients[ingredient];
+    coffeeMachineRepo.deductAvaialbleIngredients(
+      availableIngredients,
+      ingredient,
+      quantity
+    );
+  });
+}
+
+async function buildBeverage(availableIngredients, requiredIngredients) {
   let canBeServed = false;
 
   let releaseLock = await mutex.acquire();
-  // Critical Section
+
   try {
-    coffeeMachineRepo.checkIfAllIngredientsArePresent(
+    // Critical Section
+    checkIfAllIngredientsArePresentAndSufficient(
       availableIngredients,
-      ingredients
+      requiredIngredients
     );
-    ingredients.forEach((ingredient) => {
-      let quantity = requiredIngredients[ingredient];
-      coffeeMachineRepo.isIngredientSufficient(
-        availableIngredients,
-        ingredient,
-        quantity
-      );
-      coffeeMachineRepo.deductAvaialbleIngredients(
-        availableIngredients,
-        ingredient,
-        quantity
-      );
-    });
+    deductAvaialbleIngredients(availableIngredients, requiredIngredients);
     canBeServed = true;
     // Critical Section Over
     releaseLock();
