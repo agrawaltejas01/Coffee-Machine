@@ -1,28 +1,8 @@
-const Bottleneck = require('bottleneck');
 const async = require('async');
 const coffeeMachineService = require('./service/coffeeMachine');
 const coffeeMachineRepo = require('./repository/coffeeMachine');
 
-async function processDrinks(filePath) {
-  filePath = filePath || './input/1.json';
-  const data = require(filePath);
-
-  let machineOutlet = coffeeMachineRepo.getMachineOutlet(data);
-  let requriedBeverages = coffeeMachineRepo.getRequiredBeverage(data);
-  let availableIngredients = coffeeMachineRepo.getAvailableIngredients(data);
-
-  const limiter = new Bottleneck({ maxConcurrent: machineOutlet });
-  let tasks = requriedBeverages.map((beverage) => {
-    limiter.schedule(() =>
-      coffeeMachineService.serveBeverage(availableIngredients, beverage)
-    );
-  });
-
-  const result = await Promise.all(tasks);
-  console.log(result);
-}
-
-function processDrinksAsync(filePath) {
+function processDrinks(filePath, callback) {
   filePath = filePath || './input/1.json';
   const data = require(filePath);
   const resultArray = [];
@@ -38,19 +18,26 @@ function processDrinksAsync(filePath) {
       resultArray,
     }),
     function (err) {
-      if (err) console.log(err);
-      else console.log(resultArray);
+      if (err) callback(err);
+      else callback(null, resultArray);
     }
   );
 }
 
-processDrinksAsync();
+processDrinks('', function (err, result) {
+  if (err) console.error(err);
+  else console.log(result);
+});
 
-// processDrinks()
-//   //   .then(console.log())
-//   .then(() => console.log('Done'))
-//   .catch((err) => console.log(err));
+function processDrinksAsync(filePath = '') {
+  return new Promise(function (resolve, reject) {
+    processDrinks(filePath, function (err, result) {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+}
 
 module.exports = {
-  processDrinks,
+  processDrinksAsync,
 };
