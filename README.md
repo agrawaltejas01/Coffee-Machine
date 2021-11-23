@@ -5,7 +5,7 @@
 ## Description
 
 - A sample project to simulate the interface of a coffee machine
-- The Coffee Machine can have <b>N<b> parallel outlets
+- The Coffee Machine can have <b>N</b> parallel outlets
 - Machine can serve some specific beverages
 - Each beverage needs certain ingredients in specific quantity
 - Beverage cannot be served if any of the ingredient is not present or is insufficient
